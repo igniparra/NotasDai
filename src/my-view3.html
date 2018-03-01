@@ -1,0 +1,142 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view3">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .dropdown{
+        margin-left: 20px;
+        position: relative;
+        left:25px;
+        top: -10px;
+      }
+      #conjuntoDeItems{
+        background-color: #002984;
+        color: white;
+      }
+    </style>
+
+    <div class="card">
+      <div class="layout horizontal layout-start">
+        <h1>Proyecto de Auditoría</h1>
+
+        <firebase-document
+          path="/proyectos"
+          data="{{auditorias}}">
+        </firebase-document>
+
+        <paper-dropdown-menu class="dropdown">
+          <paper-listbox slot="dropdown-content" selected={{auditoria}} attr-for-selected="name">
+            <dom-repeat items="{{_toArray(auditorias)}}">
+              <template>
+                <paper-item name={{item.val}}>{{item.val}}</paper-item>
+              </template>
+            </dom-repeat>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+    </div>
+
+    <firebase-document
+      id="notasDocument"
+      path="/notas"
+      data="{{noteData}}">
+    </firebase-document>
+
+    <template is="dom-repeat" items="[[_toArray(noteData)]]">
+      <template is="dom-if" if="[[_isSelected(item.val.auditoria,auditoria,item.val.esNota)]]">
+        <div class="card">
+          <H4>Nota: [[item.val.idNota]]</h4>
+          <H4>Proyecto: [[item.val.auditoria]]</h4>
+          <H4>Destinatario: [[item.val.destinatario]]</h4>
+          <H4>Vencimiento: [[_toDDMMAAAA(item.val.vencimiento)]]</h4>
+          <template is="dom-repeat" items="[[_toArray(item.val)]]" as="nota">
+            <div class="layout horizontal layout-start">
+              <template is="dom-if" if="[[_isReiteracion(nota.key)]]" > <!--TODO VER QUE CARAJO HICE ACA-->
+                ¿Es Reiteración?: <div hidden=[[!nota.val]] class="YesNoSign"> Si</div> <div hidden=[[nota.val]] class="YesNoSign"> No</div>
+              </template>
+            </div>
+            <template is="dom-if" id="itemDomRepeat" if="[[_isItem(nota.key)]]">
+                <template is="dom-repeat" items="[[_toArray(nota.val)]]" as=itemsDeNota mutableData>
+                    <div class="card" id=conjuntoDeItems>
+                      <div class="layout horizontal layout-start">
+                        Descripción: [[itemsDeNota.val.desc]]
+                    </div>
+                </template>
+            </template>
+          </template>
+        </div>
+      </template>
+    </template>
+
+
+  </template>
+
+  <script>
+    class MyView3 extends Polymer.Element {
+      static get is() { return 'my-view3'; }
+
+      static get properties() {
+        return {
+          auditoria: {
+            type: String,
+            notify: true,
+          },
+          auditorias: Array,
+          noteData: Array,
+        };
+      }
+
+      _toArray(obj, deep){
+      var array = [];
+      for (var key in obj) {
+        if (deep || obj.hasOwnProperty(key)) {
+          array.push({
+            key: key,
+            val: obj[key]
+          });
+        }
+      }
+      return array;
+      }
+
+      _isItem(obj){
+        return obj==="items"
+      }
+
+      _isProjectID(obj){
+        return obj==="auditoria"
+      }
+
+      _isReiteracion(obj){
+        return obj==="reiterado"
+      }
+
+      _isSelected(obj,sel,esNota){
+        return (obj===sel&&(esNota))
+      }
+
+      _toDDMMAAAA(fecha){
+        var parts = fecha.match(/(\d+)/g);
+        var fechaDate = new Date(parts[0], parts[1], parts[2]);
+        return (fechaDate.getDate()+"/"+fechaDate.getMonth()+"/"+fechaDate.getFullYear())
+      }
+    }
+    window.customElements.define(MyView3.is, MyView3);
+  </script>
+</dom-module>

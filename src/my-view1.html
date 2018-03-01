@@ -1,0 +1,176 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view1">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      .saveButton{
+        background-color: #3949ab;
+        padding: 10px;
+        margin: 10px;
+      }
+      .addButton{
+        background-color: #f44336;
+        padding: 10px;
+        margin: 10px;
+        margin-left:30px;
+      }
+      .dropdown{
+        margin-left: 20px;
+        position: relative;
+        left:25px;
+        top: -10px;
+      }
+      .messageSign{
+        margin-right:20px;
+      }
+      .acceptButton{
+        background-color: #4caf50;
+        padding: 10px;
+        margin: 10px;
+        margin-left:30px;
+      }
+      .cancelButton{
+        background-color: #f44336;
+        padding: 10px;
+        margin: 10px;
+        margin-left:30px;
+      }
+      .YesNoSign{
+        margin-left: 10px;
+      }
+    </style>
+      <div class="card">
+        <div class="layout horizontal layout-start">
+          <h1>Proyecto de Auditoría</h1>
+          <firebase-document
+            path="/proyectos"
+            data="{{auditorias}}">
+          </firebase-document>
+          <paper-dropdown-menu class="dropdown">
+            <paper-listbox slot="dropdown-content" selected={{auditoria}} attr-for-selected="name">
+              <dom-repeat items="{{auditorias}}">
+                <template>
+                  <paper-item name={{item}}>{{item}}</paper-item>
+                </template>
+              </dom-repeat>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </div>
+      </div>
+    <div class="card">
+      <h1>Ingreso de Anexo</h1>
+      <paper-input id="input" label="Destinatario" value="{{destinatario}}"></paper-input>
+      <div class="layout horizontal layout-start">
+        <h3 class=messageSign>Nota de reiteración</h3><paper-toggle-button value={{reiterado}}></paper-toggle-button><br>
+      </div>
+      <h2>Items</h2>
+      <dom-repeat items="{{attachment}}" itemIndexAs="i">
+        <template>
+          <div><span>{{item}}</span><paper-icon-button icon="delete" on-tap="_removeItem" indice$=i></paper-icon-button></div>
+        </template>
+      </dom-repeat>
+      <paper-input id="input" label="Descripción" value="{{attItem}}"></paper-input>
+      <div class="layout horizontal layout-start">
+        <paper-fab class="addButton" title="Agregar" icon="add" on-tap="_addItem">
+        </paper-fab><paper-fab class="saveButton" title="Guardar" icon="save" on-tap="_openDialog"></paper-fab>
+      </div>
+    </div>
+
+    <paper-dialog
+      id="dialog"
+      entry-animation="scale-up-animation"
+      exit-animation="fade-out-animation">
+
+        <h2>Confirmación</h2>
+        <paper-dialog-scrollable>
+          ¿Está seguro que desea guardar?
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-fab dialog-confirm autofocus title="Guardar" icon="done" on-tap="_saveItems" class="acceptButton"></paper-fab>
+          <paper-fab dialog-dismiss icon="cancel" class="cancelButton">Cancelar</paper-fab>
+        </div>
+
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    class MyView1 extends Polymer.Element {
+      static get is() { return 'my-view1'; }
+
+      static get properties() {
+        return {
+          auditoria: {
+            type: String,
+            notify: true,
+            //value: "No Especificada",
+          },
+          attachment:{
+            type: Array,
+            notify: true,
+            value: () => [],
+          },
+          attItem: String,
+          reiterado: Boolean,
+          destinatario: String,
+        };
+      }
+
+      _addItem(){
+        this.push('attachment', this.attItem);
+        this.$.input.value=null;
+      }
+      _saveItems(){
+        var notesRef = firebase.database().ref('notas');
+        var noteID = notesRef.push({
+          reiterado: this.reiterado,
+          auditoria: this.auditoria,
+          idNota: "N/A",
+          destinatario: this.destinatario,
+          fechaRecibido: "N/A",
+          vencimiento: "N/A",
+          memo: "N/A",
+          esNota: false,
+        });
+        var auxArray = noteID.toString().split("/");
+        noteID = auxArray[4];
+        var itemsRef = firebase.database().ref('notas/'+noteID+'/items');
+        this.attachment.forEach(function(element){
+          itemsRef.push({
+            desc: element,
+            evaluacion: "No Evaluado",
+            decision: "No Evaluado",
+            rcvDate: "",
+            nroNotaAuditado: "N/A",
+          });
+        })
+        this.$.attachment.value=[];
+      }
+
+      _openDialog(){
+        this.$.dialog.open();
+      }
+
+      _removeItem(e){
+        var itemIndex = e.target.getAttribute('indice');
+        console.log(itemIndex);
+      }
+    }
+    window.customElements.define(MyView1.is, MyView1);
+  </script>
+</dom-module>

@@ -1,0 +1,272 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view2">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+      .dropdown{
+        margin-left: 20px;
+        position: relative;
+        left:25px;
+        top: -10px;
+      }
+      .YesNoSign{
+        margin-left: 10px;
+      }
+      #conjuntoDeItems{
+        background-color: #002984;
+        color: white;
+      }
+      .acceptButton{
+        background-color: #4caf50;
+        color: White;
+        padding: 10px;
+        margin: 10px;
+        margin-left:30px;
+      }
+      .cancelButton{
+        background-color: #f44336;
+        color: White;
+        padding: 10px;
+        margin: 10px;
+        margin-left:30px;
+      }
+    </style>
+
+    <div class="card">
+      <div class="layout horizontal layout-start">
+        <h1>Proyecto de Auditoría</h1>
+
+        <firebase-document
+          path="/proyectos"
+          data="{{auditorias}}">
+        </firebase-document>
+
+        <paper-dropdown-menu class="dropdown">
+          <paper-listbox slot="dropdown-content" selected={{auditoria}} attr-for-selected="name">
+            <dom-repeat items="{{_toArray(auditorias)}}">
+              <template>
+                <paper-item name={{item.val}}>{{item.val}}</paper-item>
+              </template>
+            </dom-repeat>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </div>
+    </div>
+
+
+      <firebase-document
+        id="notasDocument"
+        path="/notas"
+        data="{{noteData}}">
+      </firebase-document>
+
+      <template is="dom-repeat" items="[[_toArray(noteData)]]">
+        <template is="dom-if" if="[[_isSelected(item.val.auditoria,auditoria,item.val.esNota)]]">
+          <div class="card">
+            <template is="dom-repeat" items="[[_toArray(item.val)]]" as="nota">
+              <template is="dom-if" if="[[_isProjectID(nota.key)]]">
+                  <H3>Proyecto: [[nota.val]]<h3> <!--TODO Add destinatario-->
+              </template>
+              <div class="layout horizontal layout-start">
+                <template is="dom-if" if="[[_isReiteracion(nota.key)]]" > <!--TODO VER QUE CARAJO HICE ACA-->
+                  ¿Es Reiteración?: <div hidden=[[!nota.val]] class="YesNoSign"> Si</div> <div hidden=[[nota.val]] class="YesNoSign"> No</div>
+                </template>
+              </div>
+              <template is="dom-if" id="itemDomRepeat" if="[[_isItem(nota.key)]]">
+                  <template is="dom-repeat" items="[[_toArray(nota.val)]]" as=itemsDeNota mutableData>
+                      <div class="card" id=conjuntoDeItems>
+                        <div class="layout horizontal layout-start">
+                          Descripción: [[itemsDeNota.val.desc]]
+                          <paper-button raised class="acceptButton" on-tap="_editNoteDialog" item="[[itemsDeNota.key]]" nota="[[item.key]]">Editar</paper-button>
+                          <!--_editNote(Key del item de la nota, Key de la nota)-->
+                        </div>
+                      </div>
+                  </template>
+              </template>
+            </template>
+            <paper-button raised class="acceptButton" on-tap="_submitNoteDialog" nota="[[item.key]]">Enviar a Gerencia</paper-button>
+
+            <paper-button raised class="acceptButton" on-tap="_noteReceivedDialog" nota="[[item.key]]">Recibido en Organismo</paper-button>
+
+            <paper-button raised class="cancelButton" on-tap="_removeProject" nota="[[item.key]]">Remover Proyecto de Nota</paper-button>
+
+          </div>
+        </template>
+      </template>
+
+      <paper-dialog
+        id="editDialog"
+        entry-animation="scale-up-animation"
+        exit-animation="fade-out-animation"
+        style="width:300px;">
+
+          <h2>Editar Item</h2>
+          <paper-dialog-scrollable>
+            <paper-textarea style="padding-left: 30px;padding-right: 30px;" id="input" label="Ingrese nueva descripción" value="{{editingItem}}"></paper-input>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-fab dialog-confirm autofocus title="Guardar" icon="done" on-tap="_editNote" item$="[[editingItem]]" class="acceptButton"></paper-fab>
+            <paper-fab dialog-dismiss icon="cancel" class="cancelButton"></paper-fab>
+          </div>
+
+      </paper-dialog>
+
+      <paper-dialog
+        id="aGerenciaDialog"
+        entry-animation="scale-up-animation"
+        exit-animation="fade-out-animation"
+        style="width:300px;">
+
+          <h2>Enviar a Gerencia</h2>
+          <paper-dialog-scrollable>
+            <paper-input style="padding-left: 30px;padding-right: 30px;" id="input" label="Ingrese número de memo" value="{{memo}}"></paper-input>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-fab dialog-confirm autofocus title="Guardar" icon="done" on-tap="_submitNote" memo$="[[memo]]"class="acceptButton"></paper-fab>
+            <!--_submitNote(Key de la nota) Aca tiene que aparecer el popup para agregar el memo-->
+            <paper-fab dialog-dismiss icon="cancel" class="cancelButton"></paper-fab>
+          </div>
+
+      </paper-dialog>
+
+      <paper-dialog
+        id="recibidoDialog"
+        entry-animation="scale-up-animation"
+        exit-animation="fade-out-animation"
+        style="width:300px;">
+
+          <h2>Recepción del auditado</h2>
+          <paper-dialog-scrollable>
+            <paper-input style="padding-left: 30px;padding-right: 30px;" id="input" label="Ingrese número de nota" value="{{nroNota}}"></paper-input>
+            <vaadin-date-picker id="receivedPicker" style="padding-left: 30px;padding-right: 30px;" label="Recibido" value="{{rcvDate}}"></vaadin-date-picker>
+            <vaadin-date-picker id="duePicker" style="padding-left: 30px;padding-right: 30px;" label="Vencimiento" value="{{dueDate}}"></vaadin-date-picker>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-fab dialog-confirm autofocus title="Guardar" icon="done" on-tap="_noteReceived" nroNota$=[[nroNota]] rcvDate$=[[rcvDate]] dueDate$=[[dueDate]] class="acceptButton"></paper-fab>
+            <!--_noteReceived(Key de la nota) Aca tiene que aparecer el popup para agregar Nro Nota Vencimiento y recibido-->
+            <paper-fab dialog-dismiss icon="cancel" class="cancelButton"></paper-fab>
+          </div>
+
+      </paper-dialog>
+
+  </template>
+
+  <script>
+    class MyView2 extends Polymer.Element {
+      static get is() { return 'my-view2'; }
+
+      static get properties() {
+        return {
+          auditoria: {
+            type: String,
+            notify: true,
+          },
+          auditorias: Array,
+          noteData: Array,
+          currentNoteID: String,
+          currentItemID: String,
+          editingItem: {
+            type: String,
+            notify:true,
+          },
+          memo:String,
+          nroNota: String,
+          rcvDate: Date,
+          dueDate: Date,
+        };
+      }
+
+      _toArray(obj, deep){
+      var array = [];
+      for (var key in obj) {
+        if (deep || obj.hasOwnProperty(key)) {
+          array.push({
+            key: key,
+            val: obj[key]
+          });
+        }
+      }
+      return array;
+      }
+
+      _isItem(obj){
+        return obj==="items"
+      }
+
+      _isProjectID(obj){
+        return obj==="auditoria"
+      }
+
+      _isReiteracion(obj){
+        return obj==="reiterado"
+      }
+
+      _isSelected(obj,sel,esNota){
+        return (obj===sel&&(!(esNota)))
+      }
+
+      _editNoteDialog(e){
+        var itemID = e.model.itemsDeNota.key;
+        var noteID = e.model.item.key;
+        this.currentItemID=itemID;
+        this.currentNoteID=noteID;
+        this.$.editDialog.open();
+      }
+      _submitNoteDialog(e){
+        var noteID = e.model.item.key;
+        this.currentNoteID=noteID;
+        this.$.aGerenciaDialog.open();
+      }
+      _noteReceivedDialog(e){
+        var noteID = e.model.item.key;
+        this.currentNoteID=noteID;
+        this.$.recibidoDialog.open();
+      }
+
+      _editNote(e){
+        var noteContent = e.target.getAttribute('item');
+        var noteID = this.currentNoteID;
+        var itemID = this.currentItemID;
+        this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/items/" + this.currentItemID +"/desc", noteContent);
+      }
+
+      _submitNote(e){
+        var memo = e.target.getAttribute('memo');
+        console.log(memo)
+        var noteID = this.currentNoteID;
+        this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/memo", memo);
+      }
+
+      _noteReceived(e){
+        var nroNota = e.target.getAttribute('nroNota');
+        var rcvDate = e.target.getAttribute('rcvDate');
+        var dueDate = e.target.getAttribute('dueDate');
+        var noteID = this.currentNoteID;
+        console.log("nroNota: "+nroNota+" rcvDate: "+rcvDate+" dueDate: "+dueDate)
+        this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/idNota", nroNota);
+        this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/fechaRecibido", rcvDate);
+        this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/vencimiento", dueDate);
+        this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/esNota", true);
+      }
+
+    }
+
+    window.customElements.define(MyView2.is, MyView2);
+  </script>
+</dom-module>
