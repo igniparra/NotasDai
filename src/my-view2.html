@@ -79,17 +79,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <template is="dom-repeat" items="[[_toArray(noteData)]]">
         <template is="dom-if" if="[[_isSelected(item.val.auditoria,auditoria,item.val.esNota)]]">
           <div class="card">
+            <H3>Proyecto: [[item.val.auditoria]]</h3>
+            <H4>Destinatario: [[item.val.destinatario]]</h4>
+            <H4>Memo: [[item.val.memo]]</h4>
             <template is="dom-repeat" items="[[_toArray(item.val)]]" as="nota">
-              <template is="dom-if" if="[[_isProjectID(nota.key)]]">
-                  <H3>Proyecto: [[nota.val]]<h3> <!--TODO Add destinatario-->
-              </template>
               <div class="layout horizontal layout-start">
                 <template is="dom-if" if="[[_isReiteracion(nota.key)]]" > <!--TODO VER QUE CARAJO HICE ACA-->
                   ¿Es Reiteración?: <div hidden=[[!nota.val]] class="YesNoSign"> Si</div> <div hidden=[[nota.val]] class="YesNoSign"> No</div>
                 </template>
               </div>
               <template is="dom-if" id="itemDomRepeat" if="[[_isItem(nota.key)]]">
-                  <template is="dom-repeat" items="[[_toArray(nota.val)]]" as=itemsDeNota mutableData>
+                  <template  is="dom-repeat" items="[[_toArray(nota.val)]]" as=itemsDeNota mutableData>
                       <div class="card" id=conjuntoDeItems>
                         <div class="layout horizontal layout-start">
                           Descripción: [[itemsDeNota.val.desc]]
@@ -244,6 +244,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var noteID = this.currentNoteID;
         var itemID = this.currentItemID;
         this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/items/" + this.currentItemID +"/desc", noteContent);
+        this.$.itemsRepeat.render();
       }
 
       _submitNote(e){
@@ -264,7 +265,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/vencimiento", dueDate);
         this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/esNota", true);
       }
-
     }
 
     window.customElements.define(MyView2.is, MyView2);

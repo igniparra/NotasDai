@@ -54,6 +54,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-left: 10px;
       }
     </style>
+
+    <firebase-app
+      name="notasdai"
+      auth-domain="notasdai.firebaseapp.com"
+      database-url="https://notasdai.firebaseio.com"
+      api-key="AIzaSyBnabalxMF-9Ttv8DbVmj3ZEJKLSt5yr0k"
+      storage-bucket="notasdai.appspot.com"
+      messaging-sender-id="457329978150">
+    </firebase-app>
+    
       <div class="card">
         <div class="layout horizontal layout-start">
           <h1>Proyecto de Auditoría</h1>
@@ -76,10 +86,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <h1>Ingreso de Anexo</h1>
       <paper-input id="input" label="Destinatario" value="{{destinatario}}"></paper-input>
       <div class="layout horizontal layout-start">
-        <h3 class=messageSign>Nota de reiteración</h3><paper-toggle-button value={{reiterado}}></paper-toggle-button><br>
+        <h3 class=messageSign>Nota de reiteración</h3><paper-toggle-button checked={{reiterado}}></paper-toggle-button><br>
       </div>
       <h2>Items</h2>
-      <dom-repeat items="{{attachment}}" itemIndexAs="i">
+      <dom-repeat id="attachmentRepeat" items="{{attachment}}" index-as="i">
         <template>
           <div><span>{{item}}</span><paper-icon-button icon="delete" on-tap="_removeItem" indice$=i></paper-icon-button></div>
         </template>
@@ -118,7 +128,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           auditoria: {
             type: String,
             notify: true,
-            //value: "No Especificada",
           },
           attachment:{
             type: Array,
@@ -126,13 +135,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: () => [],
           },
           attItem: String,
-          reiterado: Boolean,
+          reiterado: {
+            type:Boolean,
+            notify:true,
+          },
           destinatario: String,
         };
       }
 
       _addItem(){
-        this.push('attachment', this.attItem);
+        var long=this.push('attachment', this.attItem);
+        console.log(long);
         this.$.input.value=null;
       }
       _saveItems(){
@@ -159,7 +172,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             nroNotaAuditado: "N/A",
           });
         })
-        this.$.attachment.value=[];
+        this.attachment=[];
+        this.destinatario="";
+        this.reiterado=false;
       }
 
       _openDialog(){
@@ -167,8 +182,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _removeItem(e){
-        var itemIndex = e.target.getAttribute('indice');
-        console.log(itemIndex);
+        var itemIndex = e.model.i;
+        this.attachment.splice(itemIndex,1);
+        this.$.attachmentRepeat.render();
       }
     }
     window.customElements.define(MyView1.is, MyView1);

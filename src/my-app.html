@@ -32,6 +32,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
@@ -41,6 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
 <link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
 <link rel="import" href="my-icons.html">
+
 
 <link rel="lazy-import" href="my-view1.html">
 <link rel="lazy-import" href="my-view2.html">
@@ -89,59 +93,113 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <app-location
-        route="{{route}}"
-        url-space-regex="^[[rootPath]]">
-    </app-location>
+    <firebase-app
+      name="notasdai"
+      auth-domain="notasdai.firebaseapp.com"
+      database-url="https://notasdai.firebaseio.com"
+      api-key="AIzaSyBnabalxMF-9Ttv8DbVmj3ZEJKLSt5yr0k"
+      storage-bucket="notasdai.appspot.com"
+      messaging-sender-id="457329978150">
+    </firebase-app>
 
-    <app-route
-        route="{{route}}"
-        pattern="[[rootPath]]:page"
-        data="{{routeData}}"
-        tail="{{subroute}}">
-    </app-route>
+    <firebase-auth id="auth" user="{{user}}">
+    </firebase-auth>
 
-    <app-drawer-layout fullbleed narrow="{{narrow}}">
-      <!-- Drawer content -->
-      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-        <app-toolbar>Menu</app-toolbar>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="[[rootPath]]view1">Ingreso de Anexos</a>
-          <a name="view2" href="[[rootPath]]view2">Proyectos</a>
-          <a name="view3" href="[[rootPath]]view3">Notas</a>
-        </iron-selector>
-      </app-drawer>
+    <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.11.0/firebase-auth.js"></script>
 
-      <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBnabalxMF-9Ttv8DbVmj3ZEJKLSt5yr0k",
+        authDomain: "notasdai.firebaseapp.com",
+        databaseURL: "https://notasdai.firebaseio.com",
+        projectId: "notasdai",
+        storageBucket: "notasdai.appspot.com",
+        messagingSenderId: "457329978150"
+      };
+      firebase.initializeApp(config);
+    </script>
 
-        <app-header slot="header" condenses reveals effects="waterfall">
-          <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title>Notas DAI</div>
-          </app-toolbar>
-        </app-header>
 
-        <iron-pages
-            selected="[[page]]"
-            attr-for-selected="name"
-            fallback-selection="view404"
-            role="main">
-          <my-view1 name="view1"></my-view1>
-          <my-view2 name="view2"></my-view2>
-          <my-view3 name="view3"></my-view3>
-          <my-view404 name="view404"></my-view404>
-        </iron-pages>
-      </app-header-layout>
-    </app-drawer-layout>
-  <firebase-app
-    name="notasdai"
-    auth-domain="notasdai.firebaseapp.com"
-    database-url="https://notasdai.firebaseio.com"
-    api-key="AIzaSyBnabalxMF-9Ttv8DbVmj3ZEJKLSt5yr0k"
-    storage-bucket="notasdai.appspot.com"
-    messaging-sender-id="457329978150">
-  </firebase-app>
+      <app-location
+          route="{{route}}"
+          url-space-regex="^[[rootPath]]">
+      </app-location>
+
+      <app-route
+          route="{{route}}"
+          pattern="[[rootPath]]:page"
+          data="{{routeData}}"
+          tail="{{subroute}}">
+      </app-route>
+
+      <template is="dom-if" if="[[user]]">
+
+      <app-drawer-layout fullbleed narrow="{{narrow}}">
+        <!-- Drawer content -->
+        <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
+          <app-toolbar>Menu</app-toolbar>
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+            <a name="view1" href="[[rootPath]]view1">Ingreso de Anexos</a>
+            <a name="view2" href="[[rootPath]]view2">Proyectos</a>
+            <a name="view3" href="[[rootPath]]view3">Notas</a>
+          </iron-selector>
+        </app-drawer>
+
+        <!-- Main content -->
+        <app-header-layout has-scrolling-region>
+
+          <app-header slot="header" condenses reveals effects="waterfall">
+            <app-toolbar>
+              <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+              <div main-title>Notas DAI</div>
+              <paper-button  on-tap="_logout">Salir</paper-button>
+            </app-toolbar>
+          </app-header>
+
+          <iron-pages
+              selected="[[page]]"
+              attr-for-selected="name"
+              fallback-selection="view404"
+              role="main">
+            <my-view1 name="view1"></my-view1>
+            <my-view2 name="view2"></my-view2>
+            <my-view3 name="view3"></my-view3>
+            <my-view404 name="view404"></my-view404>
+          </iron-pages>
+        </app-header-layout>
+      </app-drawer-layout>
+    </template>
+
+    <template is="dom-if" if="[[!user]]">
+      <div class="card">
+        <H1>Bienvenido a Notas DAI</H1>
+        <paper-input
+                autofocus
+                id="email"
+                label="Correo Electr&oacute;nico"
+                name="email"
+                required
+                auto-validate error-message="Debe ingresar un Correo Electrónico"
+                type="email"
+                value="{{inputUser}}">
+              </paper-input>
+              <paper-input
+                id="password"
+                label="Contrase&ntilde;a"
+                name="password"
+                required
+                auto-validate error-message="Debe ingresar una Contraseña"
+                type="password"
+                value="{{inputPass}}">
+              </paper-input>
+        <paper-button raised  on-tap="_login">Entrar</paper-button>
+      </div>
+    </template>
+
   </template>
 
   <script>
@@ -161,6 +219,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
+          user: Object,
+          inputUser: {
+            type: String,
+            notify: true,
+          },
+          inputPass: {
+            type: String,
+            notify: true,
+          },
         };
       }
 
@@ -176,8 +243,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.page = page || 'view1';
 
         // Close a non-persistent drawer when the page & route are changed.
-        if (!this.$.drawer.persistent) {
+        if(this.$.drawer){
+          if (!this.$.drawer.persistent) {
           this.$.drawer.close();
+          }
         }
       }
 
@@ -191,27 +260,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             true);
       }
 
+      _login(){
+        this.$.auth.signInWithEmailAndPassword(this.inputUser, this.inputPass)
+            .catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          if (errorCode === 'auth/wrong-password') {
+            alert('Contraseña incorrecta');
+          } else {
+            alert(errorMessage);
+          }
+          console.log(error);
+        });
+      }
+
+      _logout(){
+        this.$.auth.signOut();
+      }
+
       _showPage404() {
         this.page = 'view404';
       }
+
     }
 
     window.customElements.define(MyApp.is, MyApp);
   </script>
 
-<script src="https://www.gstatic.com/firebasejs/4.10.0/firebase.js"></script>
-<script src="https://www.gstatic.com/firebasejs/4.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/4.10.0/firebase-database.js"></script>
-<script>
-  // Initialize Firebase
-  var config = {
-    apiKey: "AIzaSyBnabalxMF-9Ttv8DbVmj3ZEJKLSt5yr0k",
-    authDomain: "notasdai.firebaseapp.com",
-    databaseURL: "https://notasdai.firebaseio.com",
-    projectId: "notasdai",
-    storageBucket: "notasdai.appspot.com",
-    messagingSenderId: "457329978150"
-  };
-  firebase.initializeApp(config);
-</script>
 </dom-module>
