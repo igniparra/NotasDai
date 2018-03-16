@@ -121,6 +121,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         messagingSenderId: "457329978150"
       };
       firebase.initializeApp(config);
+      console.log(firebase.app());
+      firebase.database.enableLogging(true);
     </script>
 
 
@@ -146,6 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <a name="view1" href="[[rootPath]]view1">Ingreso de Anexos</a>
             <a name="view2" href="[[rootPath]]view2">Proyectos</a>
             <a name="view3" href="[[rootPath]]view3">Notas</a>
+            <a name="view3" href="[[rootPath]]view4">Alta de Auditorías</a>
           </iron-selector>
         </app-drawer>
 
@@ -168,6 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <my-view1 name="view1"></my-view1>
             <my-view2 name="view2"></my-view2>
             <my-view3 name="view3"></my-view3>
+            <my-view3 name="view4"></my-view3>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </app-header-layout>
@@ -175,9 +179,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
 
     <template is="dom-if" if="[[!user]]">
-      <div class="card">
+      <div class="card" style="text-align: center; border: 3px solid black; margin: auto; width: 40%;padding:20px">
         <H1>Bienvenido a Notas DAI</H1>
         <paper-input
+                style="display: block; margin-left: auto; margin-right: auto; width: 50%;"
                 autofocus
                 id="email"
                 label="Correo Electr&oacute;nico"
@@ -188,6 +193,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 value="{{inputUser}}">
               </paper-input>
               <paper-input
+                style="display: block; margin-left: auto; margin-right: auto; width: 50%;"
                 id="password"
                 label="Contrase&ntilde;a"
                 name="password"
@@ -196,6 +202,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 type="password"
                 value="{{inputPass}}">
               </paper-input>
+              <br>
         <paper-button raised  on-tap="_login">Entrar</paper-button>
       </div>
     </template>
