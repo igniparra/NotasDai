@@ -80,15 +80,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="card">
         <div class="layout horizontal layout-start">
           <h1>Proyecto de Auditoría</h1>
-          <firebase-document
+          <firebase-query
+            id="query"
             path="/proyectos"
             data="{{auditorias}}">
-          </firebase-document>
+          </firebase-query>
           <paper-dropdown-menu class="dropdown">
             <paper-listbox slot="dropdown-content" selected={{auditoria}} attr-for-selected="name">
-              <dom-repeat items="{{auditorias}}">
+              <dom-repeat items="{{_toArray(auditorias)}}">
                 <template>
-                  <paper-item name={{item}}>{{item}}</paper-item>
+                  <paper-item name={{item.val.proyecto}}>{{item.val.proyecto}}</paper-item>
                 </template>
               </dom-repeat>
             </paper-listbox>
@@ -201,6 +202,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.attachment.splice(itemIndex,1);
         this.$.attachmentRepeat.render();
       }
+
+      _toArray(obj, deep){
+      var array = [];
+      for (var key in obj) {
+        if (deep || obj.hasOwnProperty(key)) {
+          array.push({
+            key: key,
+            val: obj[key]
+          });
+        }
+      }
+      return array;
+      }
+
     }
     window.customElements.define(MyView1.is, MyView1);
   </script>

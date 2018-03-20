@@ -44,7 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-listbox slot="dropdown-content" selected={{auditoria}} attr-for-selected="name">
             <dom-repeat items="{{_toArray(auditorias)}}">
               <template>
-                <paper-item name={{item.val}}>{{item.val}}</paper-item>
+                <paper-item name={{item.val.proyecto}}>{{item.val.proyecto}}</paper-item>
               </template>
             </dom-repeat>
           </paper-listbox>

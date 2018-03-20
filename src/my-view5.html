@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view4">
+<dom-module id="my-view5">
   <template>
     <style include="shared-styles">
       :host {
@@ -43,27 +43,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       firebase.initializeApp(config);
     </script>
 
-
     <div class="card">
+        <h1>Agregar Personal</h1>
+        <paper-input id="nombre" class="input" label="Nombre Completo" value="{{nombre}}"></paper-input>
+        <paper-input id="email" class="input" label="email" value="{{email}}"></paper-input>
+        <br>
+        <paper-button raised on-tap="_createUser" style="background-color:#002984;color:white">Agregar Usuario</paper-button>
+        <h1>Eliminar Personal</h1>
         <firebase-document
           path="/personal"
           data="{{personal}}">
         </firebase-document>
-        <h1>Nueva Auditoría</h1>
-        <paper-input id="inputProyecto" class="input" label="Nombre del Proyecto" value="{{proyecto}}"></paper-input>
-        <h2>Supervisor</h2>
+
         <paper-dropdown-menu class="dropdown">
-          <paper-listbox slot="dropdown-content" selected={{inputSupervisor}} attr-for-selected="name">
-            <dom-repeat id="repeat" items="{{_toArray(personal)}}">
-              <template>
-                <paper-item name={{item}}>{{item.val.nombre}}</paper-item>
-              </template>
-            </dom-repeat>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <h2>Jefe de Equipo</h2>
-        <paper-dropdown-menu class="dropdown">
-          <paper-listbox slot="dropdown-content" selected={{inputJE}} attr-for-selected="name">
+          <paper-listbox slot="dropdown-content" selected={{personalSelected}} attr-for-selected="name">
             <dom-repeat id="repeat" items="{{_toArray(personal)}}">
               <template>
                 <paper-item name={{item}}>{{item.val.nombre}}</paper-item>
@@ -72,51 +65,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-listbox>
         </paper-dropdown-menu>
         <br>
-        <paper-button raised on-tap="_createProject" style="background-color:#002984;color:white">Generar Proyecto</paper-button>
-
+        <paper-button raised on-tap="_deleteUser" style="background-color:#002984;color:white" selectedUser$=[[personalSelected.key]]>Eliminar Usuario</paper-button>
     </div>
   </template>
 
   <script>
     Polymer.setPassiveTouchGestures(true);
-    class MyView4 extends Polymer.Element {
-      static get is() { return 'my-view4'; }
+    class MyView5 extends Polymer.Element {
+      static get is() { return 'my-view5'; }
 
       static get properties() {
         return {
-          proyecto: {
+          nombre: {
             type: String,
             notify: true,
           },
-          inputSupervisor: {
-            type: String,
-            notify: true,
-          },
-          inputJE: {
+          email: {
             type: String,
             notify: true,
           },
         };
       }
 
-      _createProject(){
-        var itemsRef = firebase.database().ref('/proyectos');
-        console.log(this.inputSupervisor);
+      _createUser(){
+        var itemsRef = firebase.database().ref('/personal');
         itemsRef.push({
-          proyecto: this.proyecto,
-          supervisor: this.inputSupervisor.val.nombre,
-          supervisorE: this.inputSupervisor.val.email,
-          jefeEquipo: this.inputJE.val.nombre,
-          jefeEquipoE: this.inputJE.val.email,
-          jefeDepartamento: "Martín Rubione",
-          jefeDepartamentoE: "mrubione@agn.gov.ar",
-          administracion: "auditoriainformatica@agn.gov.ar",
+          nombre: this.nombre,
+          email: this.email,
         });
-        this.proyecto="";
-        this.inputSupervisor="";
-        this.inputSupervisorE="";
-        this.inputJE="";
-        this.inputJEE="";
+        this.nombre="";
+        this.email="";
+      }
+
+      _deleteUser(e){
+        var key = e.target.getAttribute('selectedUser')
+        var ref = firebase.database().ref('/personal');
+        ref.child(key).remove();
+        this.personalSelected=null;
       }
 
       _toArray(obj, deep){
@@ -131,8 +116,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       return array;
       }
-
     }
-    window.customElements.define(MyView4.is, MyView4);
+    window.customElements.define(MyView5.is, MyView5);
   </script>
 </dom-module>
