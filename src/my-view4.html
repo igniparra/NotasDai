@@ -11,7 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view3">
+<dom-module id="my-view4">
   <template>
     <style include="shared-styles">
       :host {
@@ -30,6 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
+
     <div class="card">
         <h1>Nueva Auditoría</h1>
         <paper-input id="inputProyecto" class="input" label="Nombre del Proyecto" value="{{proyecto}}"></paper-input>
@@ -44,8 +45,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyView3 extends Polymer.Element {
-      static get is() { return 'my-view3'; }
+    Polymer.setPassiveTouchGestures(true);
+    class MyView4 extends Polymer.Element {
+      static get is() { return 'my-view4'; }
 
       static get properties() {
         return {
@@ -56,7 +58,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           inputJEE: String,
         };
       }
+
+      _createProject(){
+        //TODO Add code to save new project
+      }
     }
-    window.customElements.define(MyView3.is, MyView3);
+    window.customElements.define(MyView4.is, MyView4);
   </script>
 </dom-module>

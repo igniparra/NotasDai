@@ -55,6 +55,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBnabalxMF-9Ttv8DbVmj3ZEJKLSt5yr0k",
+        authDomain: "notasdai.firebaseapp.com",
+        databaseURL: "https://notasdai.firebaseio.com",
+        projectId: "notasdai",
+        storageBucket: "notasdai.appspot.com",
+        messagingSenderId: "457329978150"
+      };
+      firebase.initializeApp(config);
+    </script>
+
     <firebase-app
       name="notasdai"
       auth-domain="notasdai.firebaseapp.com"
@@ -120,6 +133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
+    Polymer.setPassiveTouchGestures(true);
     class MyView1 extends Polymer.Element {
       static get is() { return 'my-view1'; }
 
@@ -128,6 +142,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           auditoria: {
             type: String,
             notify: true,
+            value: "Seleccionar",
           },
           attachment:{
             type: Array,
@@ -140,6 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             notify:true,
           },
           destinatario: String,
+          user: Object,
         };
       }
 
