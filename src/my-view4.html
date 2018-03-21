@@ -73,6 +73,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-dropdown-menu>
         <br>
         <paper-button raised on-tap="_createProject" style="background-color:#002984;color:white">Generar Proyecto</paper-button>
+        <br><br>
+        <h1>Completar Auditoría</h1>
+        <firebase-document
+          path="/proyectos"
+          data="{{auditorias}}">
+        </firebase-document>
+
+        <paper-dropdown-menu class="dropdown">
+          <paper-listbox slot="dropdown-content" selected={{auditoria}} attr-for-selected="name">
+            <dom-repeat items="{{_toArray(auditorias)}}">
+              <template>
+                <paper-item name={{item.val.proyecto}}>{{item.val.proyecto}}</paper-item>
+              </template>
+            </dom-repeat>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <br>
+        <paper-button raised on-tap="_openDialog" style="background-color:#f44336;color:white">Eliminar Proyecto</paper-button>
+
+        <paper-dialog
+          id="dialog"
+          entry-animation="scale-up-animation"
+          exit-animation="fade-out-animation">
+
+            <h2>Confirmación</h2>
+            <paper-dialog-scrollable>
+              ¿Está seguro que desea eliminar?
+            </paper-dialog-scrollable>
+            <div class="buttons">
+              <paper-fab dialog-confirm autofocus title="borrar" icon="done" on-tap="_deleteProject" style="background-color:#f44336;color:white"></paper-fab>
+              <paper-fab dialog-dismiss icon="cancel" style="background-color:#002984;color:white">Cancelar</paper-fab>
+            </div>
+
+        </paper-dialog>
+
+
 
     </div>
   </template>
@@ -96,6 +132,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: String,
             notify: true,
           },
+          auditoria: {
+            type: String,
+            notify: true,
+          },
+          auditorias: Array,
         };
       }
 
@@ -130,6 +171,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
       return array;
+      }
+
+      _deleteProject(){
+        var notas = firebase.database().ref('/notas');
+        var proyectos = firebase.database().ref('/proyectos');
+        var selectedAuditoria = this.auditoria;
+        notas.on('value', function(notasSnapshot) {
+            notasSnapshot.forEach(function (snapshot) {
+                if (snapshot.val().auditoria == selectedAuditoria){
+                  notas.child(snapshot.key).remove();
+                }
+            });
+        });
+        proyectos.on('value', function(proyectosSnapshot) {
+            proyectosSnapshot.forEach(function (snapshot) {
+                if (snapshot.val().proyecto == selectedAuditoria){
+                  proyectos.child(snapshot.key).remove();
+                }
+            });
+        });
+        this.auditoria=null;
+      }
+
+      _openDialog(){
+        this.$.dialog.open();
       }
 
     }

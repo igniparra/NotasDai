@@ -78,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{noteData}}">
       </firebase-document>
 
-      <template is="dom-repeat" items="[[_toArray(noteData)]]">
+      <template is="dom-repeat" id="itemsRepeat" items="[[_toArray(noteData)]]">
         <template is="dom-if" if="[[_isSelected(item.val.auditoria,auditoria,item.val.esNota)]]">
           <div class="card">
             <H3>Proyecto: [[item.val.auditoria]]</h3>
@@ -86,15 +86,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <H4>Memo: [[item.val.memo]]</h4>
             <template is="dom-repeat" items="[[_toArray(item.val)]]" as="nota">
               <div class="layout horizontal layout-start">
-                <template is="dom-if" if="[[_isReiteracion(nota.key)]]" > <!--TODO VER QUE CARAJO HICE ACA-->
+                <template is="dom-if" if="[[_isReiteracion(nota.key)]]" >
                   ¿Es Reiteración?: <div hidden=[[!nota.val]] class="YesNoSign"> Si</div> <div hidden=[[nota.val]] class="YesNoSign"> No</div>
                 </template>
               </div>
-              <template is="dom-if" id="itemDomRepeat" if="[[_isItem(nota.key)]]">
+              <template is="dom-if" id="itemDomRepeat" if="[[_isItem(nota.key,nota.val.desc)]]">
                   <template  is="dom-repeat" items="[[_toArray(nota.val)]]" as=itemsDeNota mutableData>
                       <div class="card" id=conjuntoDeItems>
                         <div class="layout horizontal layout-start">
-                          Descripción: [[itemsDeNota.val.desc]]
+                          Descripción: {{itemsDeNota.val.desc}}
                           <paper-button raised class="acceptButton" on-tap="_editNoteDialog" item="[[itemsDeNota.key]]" nota="[[item.key]]">Editar</paper-button>
                           <!--_editNote(Key del item de la nota, Key de la nota)-->
                         </div>
@@ -181,7 +181,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             notify: true,
           },
           auditorias: Array,
-          noteData: Array,
+          noteData: {
+            type:Array,
+            notify:true,
+          },
           currentNoteID: String,
           currentItemID: String,
           editingItem: {
@@ -208,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       return array;
       }
 
-      _isItem(obj){
+      _isItem(obj,desc){
         return obj==="items"
       }
 
@@ -247,7 +250,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var noteID = this.currentNoteID;
         var itemID = this.currentItemID;
         this.$.notasDocument.setStoredValue('notas/' + this.currentNoteID + "/items/" + this.currentItemID +"/desc", noteContent);
-        this.$.itemsRepeat.render();
+
       }
 
       _submitNote(e){
